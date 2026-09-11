@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PANTS
 
-## Getting Started
+Place · Animal · Name · Thing · Score. The Filipino pen-and-paper game, on one phone that gets passed around.
 
-First, run the development server:
+## Play
+
+- 2–8 players, 1–10 rounds, 20–90s per turn, optional hard letters (Q, X, Z).
+- Each round shows one letter. Players take turns typing a Place, Animal, Name, and Thing that start with it.
+- Reveal: 10 points for a unique answer, 5 if someone else wrote the same, 0 for blank or wrong letter. Tap any answer to reject it.
+- A refresh mid-game resumes where you left off.
+
+## Stack
+
+Next.js 16 (App Router) · Tailwind 4 · Supabase (anonymous auth, Postgres) · Vercel · Vitest.
+
+## Develop
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
+pnpm test
+pnpm lint && pnpm typecheck
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Supabase (history + saved players)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The game works without Supabase. With it, finished matches, the player roster, and an anonymous answer bank are saved per device. Run `./scripts/supabase-setup.sh` once, then put the printed values in `.env.local` (see `.env.example`) and in the Vercel project's environment variables.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Schema lives in `supabase/migrations`. Push changes with `supabase db push`.
