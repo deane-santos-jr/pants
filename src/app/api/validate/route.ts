@@ -1,8 +1,9 @@
 import { generateText, Output } from "ai";
+import { enforceMeaningConsistency } from "@/game/consistency";
 import { validationRequestSchema, verdictListSchema } from "@/game/validation";
 import { CATEGORY_LABELS } from "@/game/types";
 
-const MODELS = (process.env.VALIDATION_MODELS ?? "anthropic/claude-3-haiku,openai/gpt-4.1-mini").split(",");
+const MODELS = (process.env.VALIDATION_MODELS ?? "anthropic/claude-haiku-4.5,anthropic/claude-3-haiku").split(",");
 
 const instructions = `You are the strict referee for PANTS, a Filipino party word game like Scattergories.
 For each answer, first write "meaning": what the word actually is, in one short sentence (e.g. "Tagalog word for lion", "a Spanish male first name", "an English adjective meaning attractive", "a Filipino coconut liquor"). Then decide "valid".
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     .map((entry) => `key=${entry.key} | category=${CATEGORY_LABELS[entry.category]} | answer="${entry.answer}"`)
     .join("\n");
 
-  const known = new Set(entries.map((entry) => entry.key));
+  const categoryOf = new Map(entries.map((entry) => [entry.key, entry.category]));
   const failures: string[] = [];
   for (const model of MODELS) {
     try {
@@ -36,7 +37,10 @@ export async function POST(request: Request) {
         system: instructions,
         prompt: `Letter: ${letter}\nReturn one verdict per key, using the exact keys given.\n${prompt}`,
       });
-      return Response.json({ verdicts: output.verdicts.filter((verdict) => known.has(verdict.key)), model });
+      const verdicts = output.verdicts
+        .filter((verdict) => categoryOf.has(verdict.key))
+        .map((verdict) => enforceMeaningConsistency(categoryOf.get(verdict.key)!, verdict));
+      return Response.json({ verdicts, model });
     } catch (cause) {
       failures.push(`${model}: ${cause instanceof Error ? cause.message : String(cause)}`);
     }
