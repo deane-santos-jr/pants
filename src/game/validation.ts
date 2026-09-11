@@ -23,6 +23,7 @@ export const verdictListSchema = z.object({
   verdicts: z.array(
     z.object({
       key: z.string(),
+      meaning: z.string().max(160),
       valid: z.boolean(),
       reason: z.string().max(120),
     }),

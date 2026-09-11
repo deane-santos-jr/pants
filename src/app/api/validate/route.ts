@@ -4,12 +4,18 @@ import { CATEGORY_LABELS } from "@/game/types";
 
 const MODELS = (process.env.VALIDATION_MODELS ?? "anthropic/claude-3-haiku,openai/gpt-4.1-mini").split(",");
 
-const instructions = `You judge answers in PANTS, a Filipino party word game like Scattergories.
-Each answer must be a real example of its category and start with the given letter.
-Categories: Place (a real city, town, province, country, landmark, or geographic feature), Animal (a real animal, in English or Filipino/Tagalog), Name (a first name, surname, or well-known person or character), Thing (a concrete common noun for an object or item, in English or Filipino/Tagalog).
-Accept Filipino, Tagalog, Bisaya, Taglish, and English. Accept minor misspellings when the intended word is obvious. Accept plural and singular.
-Reject an answer only when it clearly is not that category: for example a person's name given as an Animal, an animal given as a Place, an adjective or verb given as a Thing, or gibberish.
-Give a reason of at most 12 words, written for the players.`;
+const instructions = `You are the strict referee for PANTS, a Filipino party word game like Scattergories.
+For each answer, first write "meaning": what the word actually is, in one short sentence (e.g. "Tagalog word for lion", "a Spanish male first name", "an English adjective meaning attractive", "a Filipino coconut liquor"). Then decide "valid".
+
+An answer is valid only if the thing it names belongs to its category:
+- Place: a real city, town, province, region, country, continent, landmark, body of water, or geographic feature. Not a food, drink, object, person, or animal.
+- Animal: a real animal species or common animal name, in English or a Philippine language. A person's name is NOT an animal, even if it sounds like one.
+- Name: a first name, surname, nickname, or a well-known real or fictional person or character.
+- Thing: a concrete common noun for a physical object, food, drink, material, or item. Adjectives, verbs, feelings, and proper nouns are NOT things.
+
+Be consistent with your own "meaning": if you wrote that a word is an adjective, verb, feeling, or a person's name, then it is not a valid Thing, Place, or Animal.
+Accept English, Tagalog, Bisaya, other Philippine languages, and Taglish. Accept obvious misspellings and plurals. Do not accept a word just because it exists; it must fit the category. Ignore the starting letter; that is checked elsewhere.
+"reason" is at most 12 words, addressed to the players, in English.`;
 
 export async function POST(request: Request) {
   const parsed = validationRequestSchema.safeParse(await request.json().catch(() => null));
