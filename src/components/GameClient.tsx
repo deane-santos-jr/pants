@@ -86,6 +86,7 @@ function GameBoard() {
           match={match}
           isFinal={isFinalRound(match)}
           onToggleReject={(playerId, category) => dispatch({ type: "toggle-reject", playerId, category })}
+          onValidated={(verdicts) => dispatch({ type: "set-validation", verdicts })}
           onNext={() => dispatch({ type: "next-round", random: Math.random })}
         />
       )}

@@ -24,11 +24,17 @@ const playFullRound = (match: Match): Match => {
 };
 
 describe("match state machine", () => {
-  it("starts in pass phase with the first player and a letter", () => {
+  it("starts in pass phase with a shuffled turn order and a letter", () => {
     const match = startMatch(config, random);
     expect(match.phase).toBe("pass");
-    expect(currentPlayer(match).id).toBe("a");
+    expect(match.rounds[0].order).toEqual(["b", "a"]);
+    expect(currentPlayer(match).id).toBe("b");
     expect(match.rounds[0].letter).toBe("A");
+  });
+
+  it("shuffles with a real random source without losing players", () => {
+    const match = startMatch(config, Math.random);
+    expect([...match.rounds[0].order].sort()).toEqual(["a", "b"]);
   });
 
   it("begin-turn sets the deadline from the timer", () => {
@@ -37,15 +43,15 @@ describe("match state machine", () => {
     expect(match.turnEndsAt).toBe(1000 + 45_000);
   });
 
-  it("submitting passes to the next player, then reveals after the last", () => {
+  it("submitting passes to the next player in order, then reveals after the last", () => {
     let match = matchReducer(startMatch(config, random), { type: "begin-turn", now: 0 });
     match = matchReducer(match, { type: "submit-turn", answers: { ...emptySheet(), place: "Agoo" } });
     expect(match.phase).toBe("pass");
-    expect(currentPlayer(match).id).toBe("b");
+    expect(currentPlayer(match).id).toBe("a");
     match = matchReducer(match, { type: "begin-turn", now: 0 });
     match = matchReducer(match, { type: "submit-turn", answers: emptySheet() });
     expect(match.phase).toBe("reveal");
-    expect(match.rounds[0].answers.a.place).toBe("Agoo");
+    expect(match.rounds[0].answers.b.place).toBe("Agoo");
   });
 
   it("toggle-reject flips a rejection", () => {
@@ -56,13 +62,32 @@ describe("match state machine", () => {
     expect(restored.rounds[0].rejected).toEqual([]);
   });
 
-  it("next-round picks an unused letter and resets the turn order", () => {
+  it("set-validation stores verdicts and rejects the invalid answers", () => {
+    const revealed = matchReducer(playFullRound(startMatch(config, random)), {
+      type: "toggle-reject",
+      playerId: "b",
+      category: "thing",
+    });
+    const validated = matchReducer(revealed, {
+      type: "set-validation",
+      verdicts: {
+        "a:animal": { valid: false, reason: "Leon is a name, not an animal" },
+        "a:place": { valid: true, reason: "" },
+        "b:thing": { valid: false, reason: "not a thing" },
+      },
+    });
+    expect(validated.rounds[0].rejected).toEqual(["b:thing", "a:animal"]);
+    expect(validated.rounds[0].validation?.["a:animal"].reason).toContain("Leon");
+  });
+
+  it("next-round picks an unused letter, reshuffles, and resets the turn index", () => {
     const revealed = playFullRound(startMatch(config, random));
     const next = matchReducer(revealed, { type: "next-round", random });
     expect(next.roundIndex).toBe(1);
     expect(next.rounds[1].letter).toBe("B");
+    expect(next.rounds[1].order).toEqual(["b", "a"]);
     expect(next.phase).toBe("pass");
-    expect(currentPlayer(next).id).toBe("a");
+    expect(next.turnIndex).toBe(0);
     expect(isFinalRound(next)).toBe(true);
   });
 
@@ -74,5 +99,6 @@ describe("match state machine", () => {
 
   it("rejects actions in the wrong phase", () => {
     expect(() => matchReducer(startMatch(config, random), { type: "submit-turn", answers: emptySheet() })).toThrow();
+    expect(() => matchReducer(startMatch(config, random), { type: "set-validation", verdicts: {} })).toThrow();
   });
 });

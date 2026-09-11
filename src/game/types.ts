@@ -27,10 +27,14 @@ export type AnswerSheet = Record<Category, string>;
 
 export type RejectionKey = `${PlayerId}:${Category}`;
 
+export type Verdict = { valid: boolean; reason: string };
+
 export type Round = {
   letter: string;
+  order: PlayerId[];
   answers: Record<PlayerId, AnswerSheet>;
   rejected: RejectionKey[];
+  validation?: Record<RejectionKey, Verdict>;
 };
 
 export type Phase = "pass" | "turn" | "reveal" | "results";

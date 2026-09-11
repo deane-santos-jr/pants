@@ -10,6 +10,7 @@ const players: Player[] = [
 
 const round = (overrides: Partial<Round> = {}): Round => ({
   letter: "M",
+  order: ["a", "b", "c"],
   rejected: [],
   answers: {
     a: { place: "Manila", animal: "Monkey", name: "Maria", thing: "Mug" },
@@ -52,6 +53,7 @@ describe("standings", () => {
   it("ranks by total with shared ranks on ties", () => {
     const tie: Round = {
       letter: "M",
+      order: ["a", "b", "c"],
       rejected: [],
       answers: {
         a: { place: "Manila", animal: "", name: "", thing: "" },
