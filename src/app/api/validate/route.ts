@@ -1,5 +1,4 @@
 import { generateText, Output } from "ai";
-import { enforceMeaningConsistency } from "@/game/consistency";
 import { validationRequestSchema, verdictListSchema } from "@/game/validation";
 import { CATEGORY_LABELS } from "@/game/types";
 
@@ -27,7 +26,7 @@ export async function POST(request: Request) {
     .map((entry) => `key=${entry.key} | category=${CATEGORY_LABELS[entry.category]} | answer="${entry.answer}"`)
     .join("\n");
 
-  const categoryOf = new Map(entries.map((entry) => [entry.key, entry.category]));
+  const known = new Set(entries.map((entry) => entry.key));
   const failures: string[] = [];
   for (const model of MODELS) {
     try {
@@ -37,10 +36,7 @@ export async function POST(request: Request) {
         system: instructions,
         prompt: `Letter: ${letter}\nReturn one verdict per key, using the exact keys given.\n${prompt}`,
       });
-      const verdicts = output.verdicts
-        .filter((verdict) => categoryOf.has(verdict.key))
-        .map((verdict) => enforceMeaningConsistency(categoryOf.get(verdict.key)!, verdict));
-      return Response.json({ verdicts, model });
+      return Response.json({ verdicts: output.verdicts.filter((verdict) => known.has(verdict.key)), model });
     } catch (cause) {
       failures.push(`${model}: ${cause instanceof Error ? cause.message : String(cause)}`);
     }

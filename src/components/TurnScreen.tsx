@@ -67,24 +67,26 @@ export function TurnScreen({ player, letter, endsAt, timerSeconds, onSubmit }: P
         submit();
       }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Mascot variant={player.avatar} mood={urgent ? "worried" : "happy"} size={48} />
-          <span className="font-bold">{player.name}</span>
+      <div className={`sticky top-2 z-20 sticker !shadow-[var(--shadow-puff-sm)] px-4 py-2 flex flex-col gap-2 ${urgent ? "wobble" : ""}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Mascot variant={player.avatar} mood={urgent ? "worried" : "happy"} size={40} />
+            <span className="font-bold">{player.name}</span>
+          </div>
+          <div
+            role="timer"
+            aria-live="polite"
+            className={`font-display text-3xl font-bold tabular-nums ${urgent ? "text-pink-deep" : "text-violet-deep"}`}
+          >
+            {secondsLeft}s
+          </div>
         </div>
-        <div
-          role="timer"
-          aria-live="polite"
-          className={`font-display text-3xl font-bold tabular-nums ${urgent ? "text-pink-deep" : "text-violet-deep"}`}
-        >
-          {secondsLeft}s
+        <div className="h-3 rounded-full bg-cream overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-[width] duration-200 ${urgent ? "bg-pink-deep" : "bg-violet-deep"}`}
+            style={{ width: `${progress * 100}%` }}
+          />
         </div>
-      </div>
-      <div className="h-3 rounded-full bg-white overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-[width] duration-200 ${urgent ? "bg-pink-deep" : "bg-violet-deep"}`}
-          style={{ width: `${progress * 100}%` }}
-        />
       </div>
 
       <Card className="text-center">
