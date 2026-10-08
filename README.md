@@ -2,6 +2,10 @@
 
 Place · Animal · Name · Thing · Score. The Filipino pen-and-paper game, on one phone that gets passed around.
 
+**Play it on your phone: [pants-two.vercel.app](https://pants-two.vercel.app)**. No sign-up and no install.
+
+![Four phone screens: player setup, "Pass the phone to Joy", Migo's turn on the letter B with 47 seconds left, and the reveal where the referee rejects "Balut" as an animal](docs/screenshots/hero.png)
+
 ## Play
 
 - 2–8 players, 1–10 rounds, 20–90s per turn, optional hard letters (Q, X, Z).
@@ -20,6 +24,12 @@ Arguing over whether "tigre" counts as an animal is half the game, so an LLM set
 - Rejected answers score 0 and show the referee's reason. Players can tap any answer to overrule it, and if every model fails, the game falls back to manual rejection.
 
 The starting letter is checked on the device, never by the model.
+
+<p>
+  <img src="docs/screenshots/reveal.png" width="260" alt="Reveal screen: Boracay scores +5 for two players, Bohol +10, and Balut is struck out with the reason 'Balut is food, not an animal species.'">
+  &nbsp;
+  <img src="docs/screenshots/scores.png" width="260" alt="Final results: Migo wins with 110, Bea has 100, Joy has 90">
+</p>
 
 ## Stack
 
